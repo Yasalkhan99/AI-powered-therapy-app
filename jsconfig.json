@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+      "baseUrl": ".", // 
+      "paths": {
+        // Corrected: Maps "@/lib/*" to the "lib" folder at the root
+        "@/lib/*": ["lib/*"],
+        // Add other common Next.js aliases if you use them, e.g.:
+        "@/components/*": ["components/*"],
+        "@/pages/*": ["pages/*"],
+        "@/utils/*": ["utils/*"]
+      }
+    },
+    // Recommended additions for Next.js projects for proper type checking and module resolution
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
+    "exclude": ["node_modules"]
+  }

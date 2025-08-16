@@ -1,0 +1,1 @@
+UPDATE "Appointment" SET "title" = 'Session' WHERE "title" IS NULL; 

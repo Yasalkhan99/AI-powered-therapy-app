@@ -1,0 +1,60 @@
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+
+# Database
+*.db
+*.sqlite
+dev.db
+
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+build/
+
+# Logs
+*.log
+logs/
+
+# API Keys & Secrets
+**/secrets/
+**/keys/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
+
+# Coverage reports
+coverage/
+*.lcov
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# npm debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
