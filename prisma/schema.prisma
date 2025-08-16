@@ -1,0 +1,150 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String? // This 'name' field from NextAuth, typically for OAuth.
+  // For Credentials, it can be populated from fullName.
+  email         String?   @unique
+  emailVerified DateTime?
+  password      String? // Make sure this is not null if you expect credentials login
+  image         String?
+
+  // New profile fields (added 'gender')
+  fullName       String?
+  age            Int?
+  gender         String? // <--- ADD THIS FIELD (if you want to store it)
+  country        String?
+  therapyType    String?
+  therapyFocus   String?
+  religion       String?
+  description    String?
+  setupCompleted Boolean @default(false) // <--- Keep this one and remove 'onboardingCompleted'
+
+  // Removed 'onboardingCompleted' as it's redundant with 'setupCompleted'
+
+  accounts         Account[]
+  sessions         Session[]
+  chatSessions     ChatSession[]
+  resetToken       String?       @db.VarChar(255)
+  resetTokenExpiry DateTime?
+  checkins         Checkin[]
+  appointments     Appointment[]
+  voicebotTotalUsageSeconds Int @default(0)
+  voiceSessionSetups VoiceSessionSetup[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model ChatSession {
+  id        String    @id @default(cuid())
+  title     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  duration  Int? // or Float? if it's in seconds
+  moodScore Int? // or Float?
+  summary   String? // short summary of the chat
+  type      String?   // 'chat' or 'voice', optional for migration
+  carePlan  Json?     // goals, techniques, nextStep as structured JSON
+  riskScore Float?    // 0.0 - 1.0 estimated risk indicator
+}
+
+model Message {
+  id            String      @id @default(cuid())
+  content       String      @db.Text
+  role          String // 'user' or 'assistant'
+  createdAt     DateTime    @default(now())
+  timestamp     DateTime    @default(now())
+  chatSessionId String
+  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+}
+
+model Checkin {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mood      Int // 1-10
+  energy    String // 'Low', 'Medium', 'High'
+  createdAt DateTime @default(now())
+}
+
+model Appointment {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionType String  // 'chat' or 'voice'
+  date       DateTime // Date of appointment
+  time       String   // Time slot (e.g., '14:00')
+  status     String   // 'confirmed', 'pending', 'cancelled'
+  title      String   // Session title (e.g., 'Anxiety Support')
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model VoiceSessionSetup {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  therapistId  String
+  therapistName String
+  language     String
+  supportType  String
+  duration     Int?
+  // ElevenLabs voice settings
+  voiceId      String?  // ElevenLabs voice ID
+  voiceName    String?  // ElevenLabs voice name
+  voiceGender  String?  // 'male' or 'female'
+  voiceAccent  String?  // Accent information
+  // Session preferences
+  createdAt    DateTime @default(now())
+  // Session tracking
+  sessionStartedAt DateTime? // When the actual voice session started
+  sessionEndedAt   DateTime? // When the actual voice session ended
+  actualDuration   Int?      // Actual duration in seconds
+}

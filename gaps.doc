@@ -1,0 +1,113 @@
+EchoNest vs. Ash — UI and Product Gaps (Detailed)
+Reference: https://www.talktoash.com/
+
+Overview
+- Purpose: Highlight differences between your app and Ash, with actionable recommendations to close the gap.
+- Scope: Landing/Brand, Onboarding/Journey, Chat, Insights, Voice, Trust/Privacy/Safety, Mobile/PWA, Content, Admin/Ops, Security/Performance, i18n/Tone, Engagement, Handoff.
+
+Current Strengths (Your App)
+- Chat with OpenAI (standard + streaming endpoints).
+- Profile-based personalization; basic RAG/context retrieval.
+- Database for chat sessions/messages, check-ins, appointments, voice session setup.
+- Voice page with ElevenLabs support; session tracking.
+
+High-level UI Gaps vs Ash
+- Landing/Brand: Missing hero value props, testimonials/stories, live metrics, strong CTAs, and clinical disclaimer.
+- Onboarding/Journey: No staged onboarding (goals, concerns, preferences), consent flow, or guided “journey”.
+- Chat Experience: Lacks quick replies, insights/next steps side panel, mood sliders, message feedback, safety banner, topic chips.
+- Insights/Patterns: No weekly insights or longitudinal pattern discovery UI.
+- Voice UX: Heavy page; lacks compact mic, partial transcript, seamless talk/text switching.
+- Trust/Privacy: No in-app privacy center, data export/delete, retention settings, or clear crisis notice.
+- Mobile/PWA: Not installable; no push reminders; limited mobile polish.
+- Content/Credibility: No stories/testimonials, “How it works”, or research/metrics sections.
+- Admin/Ops: No safety/usage/cost dashboards, prompt/version controls.
+- Security/Performance: Missing strict per-request auth, audit logging, model routing/cost controls.
+- Internationalization & Tone: Single-language focus; no tone/emoji/formality preferences.
+- Engagement: No streaks, reminders, weekly recaps.
+- Handoff: Basic appointments but no therapist directory/intake routing.
+
+Detailed Gaps and Recommendations
+1) Landing / Brand
+   - Add a hero with 3–4 value cards (Confidential & Secure, 24/7 Available, Natural Conversation, Guided Journey).
+   - Add testimonials/stories carousel and a metrics band (rating, messages sent, people helped).
+   - Prominent crisis disclaimer and link to resources.
+   - Clear CTAs: “Start Chat”, “Install App” (PWA), “Learn More”.
+
+2) Onboarding / Journey
+   - Staged onboarding screens: Goals, Primary concerns, Preferences (language/tone), Consent.
+   - Persist “JourneyStage” and “Goal”; surface a “Next Steps” card at the top of chat.
+   - Periodic plan refresh; nudge users to complete next steps.
+
+3) Chat Experience
+   - Quick replies/suggested prompts under the input; topic chips (Anxiety, Sleep, Work, Relationships) to steer context.
+   - Right-side panel: Weekly Insights and Next Steps.
+   - Mood slider pre/post message; store values as `Checkin` entries for trend analysis.
+   - Message actions: copy, thumbs up/down feedback.
+   - Safety banner when risk is detected; link to helplines.
+   - Improved streaming UI: skeletons, auto-scroll anchors, retry on failure.
+
+4) Insights & Patterns
+   - Weekly insights page with charts: mood trend, recurring themes (topic tags), suggested exercises.
+   - Post-session recap cards summarizing key points and action items.
+
+5) Voice UX
+   - Compact floating mic (hold/tap to talk), VU meter, partial transcript bubbles.
+   - Seamless handoff between voice and text; low-latency TTS; auto-restart with silence detection.
+
+6) Trust, Privacy, Safety
+   - Privacy center: data export/delete, retention window (e.g., 90 days), consent history.
+   - Clear crisis disclaimer; SafetyEvent logging for flagged content.
+
+7) Mobile / PWA
+   - PWA: `manifest.json`, icons, service worker; install prompt on mobile.
+   - Optional push notifications for check-ins, weekly recaps, next steps.
+
+8) Content & Credibility
+   - Stories/testimonials slider; “How it works” and FAQ; research/metrics blocks.
+
+9) Admin & Operations
+   - Protected dashboard: safety events, errors, request rate (RPM), OpenAI spend.
+   - Prompt/version controls; A/B testing harness for prompts.
+
+10) Security & Performance
+   - Enforce session checks on all APIs; audit log sensitive actions.
+   - Model router (use cheaper model by default; upgrade on complex turns), token ceilings, retry/backoff.
+
+11) Internationalization & Tone
+   - Preferences: `language`, `formality`, `emoji/tone`; prompt conditioning per user.
+
+12) Engagement Mechanics
+   - Daily check-in nudges; streaks; weekly recap emails.
+
+13) Appointments & Handoff
+   - Therapist directory links, intake form, calendar/email handoff where appropriate.
+
+Minimal Database Additions (Prisma)
+- Goal(id, userId, title, status, createdAt)
+- JourneyStage(id, userId, stage, updatedAt)
+- Insight(id, userId, weekStart, summaryJson)
+- SafetyEvent(id, userId, type, createdAt)
+- MessageFeedback(id, messageId, rating, createdAt)
+- TopicTag(id, messageId, tag)
+
+Quick 1–2 Week Backlog (High-Impact)
+- Chat: quick replies + improved streaming skeleton and auto-scroll.
+- Insights: API + page for weekly insights (mood trend, topics, suggestions).
+- Safety: crisis banner + SafetyEvent logging.
+- Landing: testimonials/metrics blocks; crisis disclaimer.
+- PWA: manifest + icons + basic service worker; mobile install prompt.
+
+Implementation Notes (Where to Wire in Code)
+- Prompting and routing: `pages/api/chat.js`, `pages/api/chat/stream.js`.
+- Personalization: load new profile/journey/goal fields before OpenAI calls.
+- Insights: `pages/api/insights/weekly.js` + `pages/insights.js` (charts).
+- Safety: detect risk in backend; toggle banner in `pages/chat.js`.
+- Database: update `prisma/schema.prisma`; run `npx prisma migrate dev`.
+- Mobile/PWA: add `public/manifest.json`, icons, simple service worker; prompt install.
+
+Rollout Suggestions
+- Phase 1 (Week 1–2): Quick replies, insights v1, crisis banner, landing polish, PWA.
+- Phase 2 (Week 3–4): Journey/Goals, mood sliders, feedback, privacy center.
+- Phase 3 (Week 5+): Admin dashboard, advanced voice UX, model router/cost controls, i18n.
+
+
