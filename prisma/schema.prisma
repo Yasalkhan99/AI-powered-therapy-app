@@ -3,11 +3,11 @@
 
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native", "rhel-openssl-1.1.x"]
+  binaryTargets = ["native", "rhel-openssl-1.1.x", "debian-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -17,12 +17,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -63,7 +63,7 @@ model User {
   accounts         Account[]
   sessions         Session[]
   chatSessions     ChatSession[]
-  resetToken       String?       @db.VarChar(255)
+  resetToken       String?       
   resetTokenExpiry DateTime?
   checkins         Checkin[]
   appointments     Appointment[]
@@ -97,7 +97,7 @@ model ChatSession {
 
 model Message {
   id            String      @id @default(cuid())
-  content       String      @db.Text
+  content       String      
   role          String // 'user' or 'assistant'
   createdAt     DateTime    @default(now())
   timestamp     DateTime    @default(now())
